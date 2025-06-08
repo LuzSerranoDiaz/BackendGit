@@ -2,7 +2,25 @@ networks:
     laravel:
         driver: bridge
 
-services: 
+services:
+
+    https-portal:
+        image: steveltn/https-portal:1
+        ports:
+            - 80:80
+            - 443:443
+        environment:
+            #DOMAINS: "localhost -> http://frontend:80 #local"
+            DOMAINS: "${DOMAIN} -> http://nginx:8001 #production"
+        volumes:
+            - ssl_certs_data:/var/lib/https-portal
+        depends_on:
+            - nginx
+            - php
+        restart: always
+        networks: 
+            - laravel
+
     nginx:
         image: nginx:alpine
         container_name: nginx
@@ -69,3 +87,6 @@ services:
             - mysql
         networks:
             - laravel
+
+volumes:
+    ssl_certs_data:

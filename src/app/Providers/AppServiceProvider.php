@@ -19,7 +19,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+/*         Cookie::macro('secureCrossSite', function ($name, $value, $minutes = 0) {
+        return Cookie::make($name, $value, $minutes, '/', 'backendbarberiadaw2025.duckdns.org', true, true, false, 'None');
+    });
+    Cookie::macro('Access-Control-Allow-Origin', function ($name, $value, $minutes = 0) {
+        return Cookie::make($name, $value, $minutes, '/', 'backendbarberiadaw2025.duckdns.org', true, true, false, 'None');
+    }); */
     }
 
 }
