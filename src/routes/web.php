@@ -68,6 +68,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
     //Citas
     Route::post('appointments', [AppointmentController::class, 'add']);
+    Route::post('appointments/disponibilidad', [AppointmentController::class, 'getDisponibilidad']);
     /**
      *      nombre_cliente y nombre_empleado: string
      *      DNI_cliente y DNI_empleado: string con ocho digitos y una letra
@@ -85,7 +86,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::delete('appointments/{id}', [AppointmentController::class, 'delete'])->middleware(checkRole::class);
 
     //Servicios
-    Route::post('services', [ServiceController::class, 'add'])->middleware(checkRole::class);
+    Route::post('services', [ServiceController::class, 'add']);
     Route::get('services', [ServiceController::class, 'show']);
     Route::get('services/{id}', [ServiceController::class, 'getService'])->middleware(checkRole::class);
     Route::put('services/{id}', [ServiceController::class, 'update'])->middleware(checkRole::class);
@@ -99,8 +100,14 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::delete('specialties/{id}', [SpecialtyController::class, 'delete'])->middleware(checkRole::class);
 
     // Rutas para asignar especialidades a empleados
-    Route::post('employees/{employee}/specialties', [EmployeeSpecialtyController::class, 'assign'])->middleware(checkRole::class);
+    /* Route::post('employees/{employee}/specialties', [EmployeeSpecialtyController::class, 'assign'])->middleware(checkRole::class);
     Route::get('employees/{employee}/specialties', [EmployeeSpecialtyController::class, 'list'])->middleware(checkRole::class);
-    Route::delete('employees/{employee}/specialties/{specialty}', [EmployeeSpecialtyController::class, 'delete'])->middleware(checkRole::class);
+    Route::delete('employees/{employee}/specialties/{specialty}', [EmployeeSpecialtyController::class, 'delete'])->middleware(checkRole::class); */
 });
+
+//verificacion email
+Route::get('/verify-email/{token}', [AuthController::class, 'verifyEmail']);
+//recuperacion contraseña
+Route::post('password/token', [AuthController::class, 'requestReset']);
+Route::post('password/reset', [AuthController::class, 'resetPassword']);
 

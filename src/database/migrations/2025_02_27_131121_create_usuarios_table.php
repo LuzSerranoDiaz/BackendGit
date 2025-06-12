@@ -18,6 +18,10 @@ return new class extends Migration
             $table->string('nombre');
             $table->string('nombreUsuario');
             $table->boolean('isAdmin')->default(false);
+            $table->timestamp('email_verified_at')->nullable();
+            /* $table->boolean('is_email_verified')->default(0); */
+            $table->string('verification_token', 64)->nullable();
+            $table->string('reset_token', 64)->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

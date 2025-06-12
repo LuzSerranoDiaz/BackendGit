@@ -31,8 +31,13 @@ return [
         '*/contracts',
         'employees',
         'appointments',
+        'appointments/*',
         'services',
         'specialties',
+        'verify-email/*',
+        'password/*',
+        'citas',
+        '*/customers'
     ],
 
     'allowed_methods' => ['*'],
@@ -47,7 +52,6 @@ return [
 
     'max_age' => 0,
 
-    'supports_credentials' => true,
     'supports_credentials' => true,
 
 ];

@@ -20,7 +20,8 @@ class Cita extends Model
         'contrato_id',
         'fecha',
         'estado',
-        'numero_de_atenciones',
+        'hora_inicio',
+        'hora_fin'
     ];
 
     /**

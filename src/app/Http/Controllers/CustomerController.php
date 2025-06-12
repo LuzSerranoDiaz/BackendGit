@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use Hash;
 use Illuminate\Http\Request;
 use App\Models\Cliente;
 use App\Models\Usuario;
 use Illuminate\Support\Facades\DB;
+use Str;
 
 /**
  * Clase Controlador de Cliente y su usuario asociado
@@ -72,7 +74,8 @@ class CustomerController extends Controller
             'nombre' => $validatedData['nombre'],
             'nombreUsuario' => $validatedData['nombreUsuario'],
             'email' => $validatedData['email'],
-            'contrasena' => $validatedData['contrasena'],
+            'contrasena' => Hash::make($validatedData['contrasena']),
+            'email_verified_at' => now(),
         ]);
 
         $cliente = Cliente::create([
@@ -97,6 +100,7 @@ class CustomerController extends Controller
         $validatedData = $request->validate([
             'apellidos' => 'required|string|max:255',
             //'email' => 'required|email|unique:usuarios,email',
+
             'tlf' => 'required|unique:clientes,tlf|digits_between:9,15|regex:/^\+?\d+$/',
             'direccion' => 'required|string|max:255',
             'municipio' => 'required|string|max:255',
@@ -211,10 +215,11 @@ class CustomerController extends Controller
         return response()->json($cliente, 200);
     }
 
+    
     public function getCustomerUserId($user_id)
     {
         $cliente = DB::table('clientes')->where('usuario_id', '=', $user_id)->get();
-        if (!$cliente) {
+        if ($cliente->isEmpty()) {
             return response()->json(['message' => 'Cliente no encontrado'], 404);
         }
 

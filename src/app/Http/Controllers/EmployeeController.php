@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use DB;
+use Hash;
 use Illuminate\Http\Request;
 use App\Models\Empleado;
 use App\Models\Usuario;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Str;
 
 /**
  * Clase Controlador de Empleados
@@ -76,7 +78,8 @@ class EmployeeController extends Controller
             'nombre' => $validatedData['nombre'],
             'nombreUsuario' => $validatedData['nombreUsuario'],
             'email' => $validatedData['email'],
-            'contrasena' => $validatedData['contrasena'],
+            'contrasena' => Hash::make($validatedData['contrasena']),
+            'email_verified_at' => now(),
         ]);
 
         $empleado = Empleado::create([
@@ -194,7 +197,7 @@ class EmployeeController extends Controller
                 'empleados.DNI',
                 'empleados.anos_experiencia',
                 'usuarios.email',
-                'usuarios.contrasena',
+                /* 'usuarios.contrasena', */
                 'usuarios.nombre',
                 'usuarios.nombreUsuario'
             )->join('usuarios', 'usuario_id', 'usuarios.id');

@@ -15,10 +15,11 @@ return new class extends Migration
             $table->id();
             $table->foreignId('cliente_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreignId('empleado_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
-            $table->foreignId('contrato_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
-            $table->dateTime('fecha')->nullable();
+            //$table->foreignId('contrato_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
+            $table->date('fecha');
+            $table->time('hora_inicio');
+            $table->time('hora_fin');
             $table->enum('estado', ['pendiente', 'cancelado', 'completado']);
-            $table->integer('numero_de_atenciones');
             $table->timestamps();
         });
     }

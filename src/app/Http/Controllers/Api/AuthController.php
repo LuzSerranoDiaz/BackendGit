@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use GuzzleHttp\Psr7\Response;
 use Illuminate\Support\Facades\Hash;
+use Str;
+use function PHPUnit\Framework\isEmpty;
 
 class AuthController extends Controller
 {
@@ -54,11 +56,14 @@ class AuthController extends Controller
             'nombre' => $request->nombre,
             'nombreUsuario' => $request->nombreUsuario,
             'email' => $request->email,
-            'contrasena' => $request->contrasena, 
+            'contrasena' => /* $request->contrasena,  */ Hash::make($request->contrasena),
+            'verification_token' => Str::random(64),
         ]);
 
         // Generar un token de acceso personal
         $token = $usuario->createToken('auth_token')->plainTextToken;
+
+        /* $usuario->sendEmailVerificationNotification(); */
 
         // Respuesta exitosa sin devolver la contraseña
         return response()->json([
@@ -68,6 +73,7 @@ class AuthController extends Controller
             'nombre' => $usuario->nombre,
             'nombreUsuario' => $usuario->nombreUsuario,
             'email' => $usuario->email,
+            'verification_token' => $usuario->verification_token
         ], 201);
     }
 
@@ -96,35 +102,34 @@ class AuthController extends Controller
 
         $user = Usuario::where('email', $request->email)->first();
 
-        if (!$user || $user->contrasena !== $request->contrasena) { 
-            return response()->json([
-                'message' => 'Credenciales incorrectas',
-            ], 401);
+        if (isEmpty($user)) {
+            return response()->json(['message' => 'Email no registrado'], 401);
+        }
+
+        if (!Hash::check($request->contrasena, $user->contrasena)) {
+            return response()->json(['message' => 'Contraseña incorrecta'], 401);
+        }
+
+        if (!$user->hasVerifiedEmail()) {
+            return response()->json(['message' => 'Debes verificar tu correo.'], 403);
         }
 
         // Generar un token para el usuario autenticado
         $token = $user->createToken('auth_token')->plainTextToken;
-
-/*         if ($user->isAdmin == 1) {
-            return response()->json([
-                'message' => 'Inicio de sesión exitoso',
-                'token_admin' => $token,
-                'token_type' => 'Bearer',
-            ]);
-        } */
 
         return response()->json([
             'message' => 'Inicio de sesión exitoso',
             'token' => $token,
             'token_type' => 'Bearer',
         ]);
-        
+
     }
-    
+
     /**
      * Cierre de sesion
      */
-    public function logout(Request $request) {
+    public function logout(Request $request)
+    {
         $request->user()->currentAccessToken()->delete();
         return response()->json([
             'message' => 'Has salido de la cuenta',
@@ -134,7 +139,8 @@ class AuthController extends Controller
     /**
      * Obtener credenciales de un usuario autenticado
      */
-    public function getUser(Request $request) {
+    public function getUser(Request $request)
+    {
         // Verifica si el usuario está autenticado
         if (Auth::check()) {
             // Obtén el usuario autenticado
@@ -162,7 +168,8 @@ class AuthController extends Controller
      * Borrar un usuario
      * 
      */
-    public function deleteUser(Request $request){
+    public function deleteUser(Request $request)
+    {
         // Verifica si el usuario está autenticado
         if (Auth::check()) {
             // Obtén el usuario autenticado
@@ -181,5 +188,63 @@ class AuthController extends Controller
             'success' => false,
             'message' => 'Usuario no autenticado'
         ], 401);
+    }
+
+
+    //verificacion de email manual
+    public function verifyEmail($token)
+    {
+        $user = Usuario::where('verification_token', $token)->first();
+
+        if (!$user) {
+            return response()->json(['message' => 'Token inválido'], 404);
+        }
+
+        $user->email_verified_at = now();
+        $user->verification_token = null;
+        $user->save();
+
+        return response()->json(['message' => 'Email verificado correctamente']);
+    }
+
+
+    //Recuperacion de contraseña
+
+    //Funcion para establecer token de reset
+    public function requestReset(Request $request){
+        $request->validate(['email' => 'required|email']);
+
+        $user = Usuario::where('email', $request->email)->first();
+        if (!$user) {
+            return response()->json(['message' => 'No user found'], 404);
+        }
+
+        $token = Str::random(64);
+        $user->reset_token = $token;
+        $user->save();
+
+        return response()->json(['reset_token' => $token]);
+    }
+
+    //funcion de reseteo de contraseña
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'token' => 'required',
+            'contrasena' => 'required|min:6|confirmed',
+        ]);
+
+        $user = Usuario::where('reset_token', $request->token)->first();
+        if (!$user) {
+            return response()->json(['message' => 'Token inválido'], 404);
+        }
+
+        $contrasena = Hash::make($request->contrasena);
+
+        $user->contrasena = $contrasena;
+        $user->reset_token = null;
+        $user->save();
+
+        return response()->json(['message' => 'Contraseña actualizada con éxito', 'pswd' => $contrasena]);
     }
 }

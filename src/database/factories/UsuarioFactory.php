@@ -22,10 +22,11 @@ class UsuarioFactory extends Factory
         //$contrasena = static::$password ??= Hash::make('password');
         return [
             'email' => fake()->unique()->safeEmail(),
-            'contrasena' => fake()->password(),
+            'contrasena' => bcrypt('password'),
             'nombre' => fake()->name(),
             'nombreUsuario' => fake()->unique()->name(),
             'remember_token' => Str::random(10),
+            'email_verified_at' => now(),
         ];
     }
 }
