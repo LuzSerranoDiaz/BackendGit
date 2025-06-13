@@ -2,7 +2,25 @@ networks:
     laravel:
         driver: bridge
 
-services: 
+services:
+
+    https-portal:
+        image: steveltn/https-portal:1
+        ports:
+            - 80:80
+            - 443:443
+        environment:
+            #DOMAINS: "localhost -> http://frontend:80 #local"
+            DOMAINS: "${DOMAIN} -> http://nginx:8001 #production"
+        volumes:
+            - ssl_certs_data:/var/lib/https-portal
+        depends_on:
+            - nginx
+            - php
+        restart: always
+        networks: 
+            - laravel
+
     nginx:
         image: nginx:alpine
         container_name: nginx
@@ -54,3 +72,21 @@ services:
             - mysql
         networks: 
             - laravel
+            
+    phpmyadmin:
+        image: phpmyadmin/phpmyadmin
+        container_name: phpmyadmin
+        restart: unless-stopped
+        ports:
+            - "8080:80"
+        environment:
+            PMA_HOST: mysql
+            PMA_USER: root
+            PMA_PASSWORD: root
+        depends_on:
+            - mysql
+        networks:
+            - laravel
+
+volumes:
+    ssl_certs_data:

@@ -45,7 +45,7 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['http://localhost:4200', 'http://localhost:8001'],
+    'allowed_origins' => ['https://barbersdawcelia2025.ddns.net'/* , 'http://localhost:8001' */],
 
     'allowed_origins_patterns' => [],
 
