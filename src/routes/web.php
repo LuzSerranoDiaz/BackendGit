@@ -63,6 +63,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('{id}/employees', [EmployeeController::class, 'addEmployee'])->middleware(checkRole::class);
     Route::get('employees', [EmployeeController::class, 'show']);
     Route::get('employees/{id}', [EmployeeController::class, 'getEmployee']);
+    Route::get('employees/change/{id}', [EmployeeController::class, 'changeStateEmployee']);
     Route::put('employees/{id}', [EmployeeController::class, 'update'])->middleware(checkRole::class);
     Route::delete('employees/{id}', [EmployeeController::class, 'delete'])->middleware(checkRole::class);
 
@@ -80,7 +81,9 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
      * 
      * Se manda con parametros, que toman forma de por ejemplo "appointments?nombreCliente=Rafa&nombre_empleado:Alicia"
      */
-    Route::get('appointments', [AppointmentController::class, 'show'])->middleware(checkRole::class);
+    Route::get('appointments', [AppointmentController::class, 'show']);
+    Route::put('appointments/cancel/{id}', [AppointmentController::class, 'cancel']);
+    Route::put('appointments/complete/{id}', [AppointmentController::class, 'complete']);
     Route::get('appointments/{id}/{withServicios}', [AppointmentController::class, 'getAppointment'])->middleware(checkRole::class);
     Route::put('appointments/{id}', [AppointmentController::class, 'update'])->middleware(checkRole::class);
     Route::delete('appointments/{id}', [AppointmentController::class, 'delete'])->middleware(checkRole::class);

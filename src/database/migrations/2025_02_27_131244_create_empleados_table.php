@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('provincia');
             $table->integer('anos_experiencia')->default(0);
             $table->string('DNI');
+            $table->boolean('disponible')->default(true);
             $table->timestamps();
         });
     }

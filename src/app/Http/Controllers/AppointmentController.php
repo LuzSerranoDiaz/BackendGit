@@ -46,7 +46,7 @@ class AppointmentController extends Controller
         $horaInicio = Carbon::createFromFormat('H:i', $request->hora_inicio);
         $horaFin = $horaInicio->copy()->addMinutes($duracion);
 
-        
+
         // Verificar solapamientos
         $solapada = Cita::where('empleado_id', $request->empleado_id)
             //fecha igual que la fecha seleccionada
@@ -62,8 +62,8 @@ class AppointmentController extends Controller
             return response()->json(['error' => 'El empleado ya tiene una cita en ese horario'], 409);
         }
 
-     /*    return response()->json([$horaInicio->format('H:i'),
-            'hora_fin' => $horaFin->format('H:i'),]); */
+        /*    return response()->json([$horaInicio->format('H:i'),
+               'hora_fin' => $horaFin->format('H:i'),]); */
 
         $cita = Cita::create([
             'cliente_id' => $cliente->id,
@@ -140,27 +140,32 @@ class AppointmentController extends Controller
         }
 
         $request->validate([
-            'nombre_cliente' => 'sometimes|string',
-            'id_empleado' => 'sometimes|integer',
+            'apellido_cliente' => 'sometimes|string|nullable',
+            'id_cliente' => 'sometimes|integer|nullable',
+            'id_empleado' => 'sometimes|integer|nullable',
             //solo el dia
-            'fecha' => 'sometimes|date',
-            'estado' => 'sometimes|in:pendiente,cancelado,completado',
+            'fecha' => 'sometimes|date|nullable',
+            'estado' => 'sometimes|in:pendiente,cancelado,completado|nullable',
         ]);
 
         $query = Cita::with('servicios')
-            ->select('citas.*')
+            ->select('citas.*', 'clientes.apellidos', )
             ->join('clientes', 'cliente_id', 'clientes.id')
             ->join('empleados', 'empleado_id', 'empleados.id')
-            ->join('usuarios', 'clientes.usuario_id', 'usuarios.id'); 
+            ->join('usuarios', 'clientes.usuario_id', 'usuarios.id');
 
-        if ($request->get('nombre_cliente')) {
-            $query = $query->where('usuarios.nombre', 'LIKE', $request->get('nombre_cliente') . '%');
+        if ($request->get('apellido_cliente')) {
+            $query = $query->where('clientes.apellidos', 'LIKE', $request->get('apellido_cliente') . '%');
+        }
+        if ($request->get('id_cliente')) {
+            $query = $query->where('citas.cliente_id', '=', $request->get('id_cliente'));
         }
         if ($request->get('id_empleado')) {
             $query = $query->where('empleados.id', '=', $request->get('id_empleado'));
         }
         if ($request->get('fecha')) {
-            $query = $query->where('citas.fecha', 'LIKE', $request->get('fecha') . '%');
+            $query = $query->whereDate('citas.fecha', $request->get('fecha'));/* 
+('citas.fecha', 'LIKE', $request->get('fecha') . '%'); */
         }
         if ($request->get('estado')) {
             $query = $query->where('citas.estado', 'LIKE', $request->get('estado') . '%');
@@ -177,7 +182,7 @@ class AppointmentController extends Controller
             $citas = $citas->take((int) $request->get('take'));
         } else {
             $citas = $citas->take(Cita::count());
-        } 
+        }
 
         /* $citas = Cita::all(); */
 
@@ -185,9 +190,15 @@ class AppointmentController extends Controller
             return response()->json(['message' => 'No hay citas registradas'], 404);
         }
 
-        
+        /* $queryCliente = DB::table('clientes')->select('id','apellidos');
+                
 
-        return response()->json($citas, 200);
+        //clientes para apellido
+        foreach ($citas as $cita) {
+            $queryCliente = $queryCliente->orWhere('id', $cita->cliente_id);
+        } */
+
+        return response()->json([$citas], 200);
     }
 
     /**
@@ -288,11 +299,52 @@ class AppointmentController extends Controller
         return response()->json(['message' => 'Cita eliminada correctamente'], 200);
     }
 
+    /**
+     * Cancela una cita
+     */
+    public function cancel($idCita)
+    {
+
+        /* return response()->json([$cita], 200); */
+        try {
+            $cita = Cita::FindOrFail($idCita);
+        } catch (ModelNotFoundException) {
+            return response()->json(['message' => 'Cita no encontrada'], 404);
+        }
+
+        $cita->estado = 'cancelado';
+        $cita->save();
+
+        return response()->json([$cita], 200);
+    }
+
+    /**
+     * Cancela una cita
+     */
+    public function complete($idCita)
+    {
+
+        /* return response()->json([$cita], 200); */
+        try {
+            $cita = Cita::FindOrFail($idCita);
+        } catch (ModelNotFoundException) {
+            return response()->json(['message' => 'Cita no encontrada'], 404);
+        }
+
+        $cita->estado = 'completado';
+        $cita->save();
+
+        return response()->json([$cita], 200);
+    }
+
+
+
     /** 
      * Devuelve la disponibilidad de citas en un dia concreto
      */
 
-    public function getDisponibilidad(Request $request){
+    public function getDisponibilidad(Request $request)
+    {
 
         $request->validate([
             'fecha' => 'required|date|after_or_equal:today',

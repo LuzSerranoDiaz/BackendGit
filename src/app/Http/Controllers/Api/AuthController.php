@@ -102,9 +102,9 @@ class AuthController extends Controller
 
         $user = Usuario::where('email', $request->email)->first();
 
-        if (isEmpty($user)) {
+        /* if (isEmpty($user)) {
             return response()->json(['message' => 'Email no registrado'], 401);
-        }
+        } */
 
         if (!Hash::check($request->contrasena, $user->contrasena)) {
             return response()->json(['message' => 'Contraseña incorrecta'], 401);
@@ -209,7 +209,6 @@ class AuthController extends Controller
 
 
     //Recuperacion de contraseña
-
     //Funcion para establecer token de reset
     public function requestReset(Request $request){
         $request->validate(['email' => 'required|email']);

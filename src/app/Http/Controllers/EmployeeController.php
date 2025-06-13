@@ -333,4 +333,26 @@ class EmployeeController extends Controller
 
         return response()->json(['message' => 'empleado eliminado correctamente'], 200);
     }
+
+    /**
+     * Habilita o deshabilita un empleado
+     */
+    public function changeStateEmployee(Request $request, $id)
+    {
+        $empleado = Empleado::with('usuario')->find($id);
+
+        if (!$empleado) {
+            return response()->json(['message' => 'Empleado no encontrado, no esta registrado en el sistema'], 404);
+        }
+        $empleado->disponible = !$empleado->disponible;
+        $empleado->save();
+
+
+        return response()->json([
+            'message' => 'Estado de disponibilidad actualizado correctamente.',
+            'empleado' => $empleado->load('usuario')
+        ]);
+        /* 
+                return response()->json($empleado->load('usuario'), 200); */
+    }
 }

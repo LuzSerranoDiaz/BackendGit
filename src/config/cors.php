@@ -37,7 +37,10 @@ return [
         'verify-email/*',
         'password/*',
         'citas',
-        '*/customers'
+        '*/customers',
+        'employees/change/*',
+        'appointments/cancel/{id}',
+        'appointments/complete/{id}'
     ],
 
     'allowed_methods' => ['*'],

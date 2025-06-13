@@ -22,7 +22,8 @@ class Empleado extends Model
         'municipio',
         'provincia',
         'anos_experiencia', 
-        'DNI'
+        'DNI',
+        'disponible'
     ];
     /**
      * Get the user associated with the Cliente
