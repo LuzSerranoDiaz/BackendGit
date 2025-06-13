@@ -8,3 +8,8 @@ Carpeta de codigo fuente de laravel
 Servicios de php:8.2-fpm-alpine(9000:9000), mysql(4306:3306) y nginx:alpine(8001:8001)
 ### Dockerfile
 Imagen de php con extensiones de php y composer instalado
+
+# Como arrancar proyecto
+docker compose up -d
+make php
+php artisan migrate:fresh --seed
