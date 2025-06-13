@@ -1,0 +1,4 @@
+# Como arrancar proyecto
+docker compose up -d
+make php
+php artisan migrate:fresh --seed
