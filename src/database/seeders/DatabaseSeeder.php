@@ -40,7 +40,21 @@ class DatabaseSeeder extends Seeder
             Empleado::factory()
         )->create();
         EmpleadoEspecilidad::factory(3)->create();
-        Servicio::factory(3)->create();
+        Servicio::factory()->create([
+            'nombre' => 'corte', 
+            'duracion' => '30', 
+            'precio' => '15'
+        ]);
+        Servicio::factory()->create([
+            'nombre' => 'peinado', 
+            'duracion' => '15', 
+            'precio' => '20'
+        ]);
+        Servicio::factory()->create([
+            'nombre' => 'tinte', 
+            'duracion' => '60', 
+            'precio' => '50'
+        ]);
         Cita::factory(100)->create();
         CitaServicio::factory(random_int(200, 500))->create();
     }
